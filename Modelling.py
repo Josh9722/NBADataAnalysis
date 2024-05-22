@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV, StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -22,12 +22,12 @@ class Modelling:
         else:
             print("Feature importances not provided. Setting to 1 for all features.")
             self.feature_importances = 1
-
+    
     def train_model(self, x_train, y_train, model_name, param_grid=None):
         model = self.models[model_name]
 
         if param_grid:
-            grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy')
+            grid_search = GridSearchCV(model, param_grid, cv=4, scoring='roc_auc')
             grid_search.fit(x_train, y_train)
             model = grid_search.best_estimator_
             self.best_params[model_name] = grid_search.best_params_
@@ -72,4 +72,4 @@ class Modelling:
             self.trained_models[model_name] = model
             labels = model.predict(data)
             return model, labels
-        
+          
