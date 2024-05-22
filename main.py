@@ -17,7 +17,8 @@ def main():
     train_data = preprocess.duplicate_value_analysis(train_data)
     train_data = preprocess.outlier_analysis(train_data)
     train_data = preprocess.feature_engineering(train_data)
-    print("Feature Importances:\n", preprocess.determine_feature_importance(train_data))
+    feature_importance = preprocess.determine_feature_importance(train_data)
+    print("Feature Importances:\n", feature_importance)
 
     # Testing Data
     test_data = preprocess.null_value_analysis(test_data)
@@ -33,28 +34,29 @@ def main():
 
     
     # STEP 2: MODELLING
-    model_instance = modelling.Modelling()
+    model_instance = modelling.Modelling(feature_importances = feature_importance)
     # Train and evaluate KNN
     knn_params = {'n_neighbors': [3, 5, 7]}
     knn_model = model_instance.train_model(x_train, y_train, 'knn', param_grid=knn_params)
     knn_accuracy = model_instance.evaluate_model(knn_model, x_test, y_test)
-    print("KNN Model Accuracy:", knn_accuracy)
+    print("KNN Model Accuracy (Overall, When 5rs=1, When 5rs=0):", knn_accuracy)
 
     # Train and evaluate Decision Tree
-    dt_params = {'max_depth': [5, 10, 15]}
+    dt_params = {'criterion': ['entropy'], 'max_depth': [5], 'min_samples_leaf': [2], 'min_samples_split': [2]}
     dt_model = model_instance.train_model(x_train, y_train, 'decision_tree', param_grid=dt_params)
     dt_accuracy = model_instance.evaluate_model(dt_model, x_test, y_test)
-    print("Decision Tree Model Accuracy:", dt_accuracy)
+    print("Decision Tree Model Accuracy (Overall, When 5rs=1, When 5rs=0):", dt_accuracy)
 
     # Train and evaluate Random Forest
     rf_model = model_instance.train_model(x_train, y_train, 'random_forest')
     rf_accuracy = model_instance.evaluate_model(rf_model, x_test, y_test)
-    print("Random Forest Model Accuracy:", rf_accuracy)
+    print("Random Forest Model Accuracy (Overall, When 5rs=1, When 5rs=0):", rf_accuracy)
 
     # Perform KMeans clustering on the entire dataset (example)
     kmeans_params = {'n_clusters': [2, 3, 4]}
     kmeans_model, cluster_labels = model_instance.perform_clustering(train_data, 'kmeans', param_grid=kmeans_params)
-    # print("KMeans Cluster Centers:", kmeans_model.cluster_centers_)
+    #print("KMeans Cluster Centers:", kmeans_model.cluster_centers_)
+
 
     # STEP 4: MODEL EVALUATION
     eval_instance = ModelEvaluation()
