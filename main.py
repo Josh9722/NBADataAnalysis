@@ -47,17 +47,17 @@ def main():
     # Train and evaluate KNN
     knn_model = model_instance.train_model(x_train, y_train, 'knn', param_grid=knn_params)
     knn_accuracy = model_instance.evaluate_model(knn_model, x_test, y_test)
-    print("KNN Model Accuracy (Overall, When 5rs=1, When 5rs=0):", knn_accuracy)
+    print("KNN Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", knn_accuracy)
 
     # Train and evaluate Decision Tree
     dt_model = model_instance.train_model(x_train, y_train, 'decision_tree', param_grid=dt_params)
     dt_accuracy = model_instance.evaluate_model(dt_model, x_test, y_test)
-    print("Decision Tree Model Accuracy (Overall, When 5rs=1, When 5rs=0):", dt_accuracy)
+    print("Decision Tree Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", dt_accuracy)
 
     # Train and evaluate Random Forest
     rf_model = model_instance.train_model(x_train, y_train, 'random_forest', param_grid=rf_params)
     rf_accuracy = model_instance.evaluate_model(rf_model, x_test, y_test)
-    print("Random Forest Model Accuracy (Overall, When 5rs=1, When 5rs=0):", rf_accuracy)
+    print("Random Forest Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", rf_accuracy)
 
     # Perform KMeans clustering on the entire dataset (example)
     kmeans_params = {'n_clusters': [2, 3, 4]}
