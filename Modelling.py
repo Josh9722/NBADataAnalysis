@@ -1,73 +1,51 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.cluster import KMeans
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.cluster import KMeans
 
-def train_model(x_train, y_train):
+class Modelling:
+    def __init__(self):
+        self.models = {
+            'knn': KNeighborsClassifier(),
+            'decision_tree': DecisionTreeClassifier(),
+            'random_forest': RandomForestClassifier(n_estimators=100, random_state=42)
+        }
+        self.best_params = {}
+        self.trained_models = {}
 
-    # Split train data into train and validation sets
-    train_features, val_features, train_target, val_target = train_test_split(train_features, train_target, test_size=0.2, random_state=42)
+    def train_model(self, x_train, y_train, model_name, param_grid=None):
+        model = self.models[model_name]
+        if param_grid:
+            grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy')
+            grid_search.fit(x_train, y_train)
+            model = grid_search.best_estimator_
+            self.best_params[model_name] = grid_search.best_params_
+        else:
+            model.fit(x_train, y_train)
+        
+        self.trained_models[model_name] = model
+        return model
 
-    # Train and test KNN model
-    knn_predictions = knn_model(train_features, train_target, val_features)
-    knn_accuracy = evaluate_accuracy(val_target, knn_predictions)
-    print("KNN Accuracy:", knn_accuracy)
+    def evaluate_model(self, model, x_test, y_test):
+        predictions = model.predict(x_test)
+        accuracy = accuracy_score(y_test, predictions)
+        return accuracy
 
-    # Train and test Decision Tree model
-    dt_predictions = decision_tree_model(train_features, train_target, val_features)
-    dt_accuracy = evaluate_accuracy(val_target, dt_predictions)
-    print("Decision Tree Accuracy:", dt_accuracy)
-
-    # Train and test K-Means model
-    kmeans_predictions = k_means_model(train_features, val_features)
-    kmeans_accuracy = evaluate_accuracy(val_target, kmeans_predictions)
-    print("K-Means Accuracy:", kmeans_accuracy)
-
-def load_data(file_path):
-    """
-    Load the dataset from a CSV file.
-    """
-    return pd.read_csv(file_path)
-
-# def preprocess_data(df):
-#     """
-#     Preprocess the dataset: remove unnecessary columns and split into features and target.
-#     """
-#     features = df.drop(['Id', 'TARGET_5Yrs'], axis=1)
-#     target = df['TARGET_5Yrs']
-#     return features, target
-
-def knn_model(train_features, train_target, test_features):
-    """
-    Train and test a KNN model.
-    """
-    knn = KNeighborsClassifier()
-    knn.fit(train_features, train_target)
-    predictions = knn.predict(test_features)
-    return predictions
-
-def decision_tree_model(train_features, train_target, test_features):
-    """
-    Train and test a Decision Tree model.
-    """
-    dt = DecisionTreeClassifier()
-    dt.fit(train_features, train_target)
-    predictions = dt.predict(test_features)
-    return predictions
-
-def k_means_model(train_features, test_features):
-    """
-    Train and test a K-Means clustering model.
-    """
-    kmeans = KMeans(n_clusters=2)  # assuming binary classification
-    kmeans.fit(train_features)
-    predictions = kmeans.predict(test_features)
-    return predictions
-
-def evaluate_accuracy(true_labels, predicted_labels):
-    """
-    Evaluate the accuracy of the model.
-    """
-    return accuracy_score(true_labels, predicted_labels)
+    def perform_clustering(self, data, model_name, param_grid=None):
+        if model_name == 'kmeans':
+            model = KMeans()
+            if param_grid:
+                grid_search = GridSearchCV(model, param_grid, cv=5)
+                grid_search.fit(data)
+                model = grid_search.best_estimator_
+                self.best_params[model_name] = grid_search.best_params_
+            else:
+                model.fit(data)
+            
+            self.trained_models[model_name] = model
+            labels = model.predict(data)
+            return model, labels
+        
