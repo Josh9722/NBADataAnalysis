@@ -32,18 +32,18 @@ def feature_engineering(df):
 
 def determine_feature_importance(df):
     # Determine feature importance using a model
-    X = df.drop(columns=['TARGET_5Yrs'])
+    x = df.drop(columns=['Id', 'TARGET_5Yrs'])
     y = df['TARGET_5Yrs']
-    model = RandomForestClassifier()
-    model.fit(X, y)
+    model = RandomForestClassifier(random_state=30)
+    model.fit(x, y)
     importances = model.feature_importances_
-    feature_importance = pd.Series(importances, index=X.columns).sort_values(ascending=False)
-    print("Feature Importances:\n", feature_importance)
+    feature_importance = pd.Series(importances, index=x.columns).sort_values(ascending=False)
     return feature_importance
 
 def perform_train_test_split(df):
     # Split the data into training and test sets
     x = df.drop(columns=['TARGET_5Yrs'])
     y = df['TARGET_5Yrs']
-    x_train, x_test, y_train, y_test = sk_train_test_split(x, y, test_size=0.2, random_state=30)
+    x_train, x_test, y_train, y_test = sk_train_test_split(x, y, test_size=0.1, random_state=30)
+
     return x_train, x_test, y_train, y_test
