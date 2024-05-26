@@ -3,15 +3,15 @@ from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSe
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, roc_curve, precision_recall_curve
 from sklearn.cluster import KMeans
 
 class Modelling:
     def __init__(self, feature_importances=None):
         self.models = {
             'knn': KNeighborsClassifier(),
-            'decision_tree': DecisionTreeClassifier(),
-            'random_forest': RandomForestClassifier(n_estimators=100)
+            'decision_tree': DecisionTreeClassifier(class_weight='balanced'),
+            'random_forest': RandomForestClassifier(class_weight='balanced_subsample')
         }
         self.best_params = {}
         self.trained_models = {}
@@ -38,8 +38,11 @@ class Modelling:
         return model
 
     def evaluate_model(self, model, x_test, y_test):
+
         # Make predictions
-        predictions = model.predict(x_test)
+        threshold = 0.4
+        predicted_proba = model.predict_proba(x_test)
+        predictions = (predicted_proba [:,1] >= threshold).astype('int')
 
         # Calculate overall accuracy
         accuracy = accuracy_score(y_test, predictions)
@@ -51,6 +54,11 @@ class Modelling:
         # Calculate the total number of predictions for each class
         total_1 = sum(predictions == 1)
         total_0 = sum(predictions == 0)
+
+        print("Total Predicitons for Case 5yrs = 1:", total_1)
+        print("Total Predicitons for Case 5yrs = 0:", total_0)
+        print("Total Amount of Case 5yrs = 1 in y_test:", sum(y_test == 1))
+        print("Total Amount of Case 5yrs = 0 in y_test:", sum(y_test == 0))
 
         # Calculate the percentage of correct predictions for each class
         percentage_correct_1 = (correct_1 / total_1) * 100 if total_1 > 0 else 0
