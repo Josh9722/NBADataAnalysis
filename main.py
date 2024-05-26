@@ -35,40 +35,58 @@ def main():
 
     # Define hyperparameters for each model
     knn_params = {'n_neighbors': [2, 3, 5, 7, 10]}
-    dt_params = {'criterion': ['gini', 'entropy'], 'max_depth': [None, 2, 4, 8, 10], 'min_samples_split': [2, 5], 'min_samples_leaf': [1, 2, 4]}
+    dt_params = {'criterion': ['gini', 'entropy', 'log_loss'], 'max_depth': [None, 2, 4, 8, 10], 'min_samples_split': [2, 5], 'min_samples_leaf': [1, 2, 4]}
     
     rf_params = {
+        #'n_estimators': [50, 100, 200, 400], Commented out for faster execution but n = 100 has been determined as most optimal
         'n_estimators': [100],
         'max_depth': [None, 5,],
         'min_samples_split': [2, 3],
         'min_samples_leaf': [1, 2],
+        'criterion': ['gini', 'entropy', 'log_loss']
     }
 
     # Train and evaluate KNN
+    print("Beginning KNN Model Training and Evaluation...")
     knn_model = model_instance.train_model(x_train, y_train, 'knn', param_grid=knn_params)
     knn_accuracy = model_instance.evaluate_model(knn_model, x_test, y_test)
-    print("KNN Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", knn_accuracy)
+    print("KNN Model Accuracy On Testing Split (Overall, When 5yrs=1, When 5yrs=0):", knn_accuracy)
+    knn_accuracy_train = model_instance.evaluate_model(knn_model, x_train, y_train)
+    print("KNN Model Accuracy On Training Split (Overall, When 5yrs=1, When 5yrs=0):", knn_accuracy_train)
+    print("--------------------------------------------------")
 
     # Train and evaluate Decision Tree
+    print("Beginning Decision Tree Model Training and Evaluation...")
     dt_model = model_instance.train_model(x_train, y_train, 'decision_tree', param_grid=dt_params)
     dt_accuracy = model_instance.evaluate_model(dt_model, x_test, y_test)
-    print("Decision Tree Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", dt_accuracy)
+    print("Decision Tree Model Accuracy On Testing Split (Overall, When 5yrs=1, When 5yrs=0):", dt_accuracy)
+    dt_accuracy_train = model_instance.evaluate_model(dt_model, x_train, y_train)
+    print("Decision Tree Model Accuracy On Training Split (Overall, When 5yrs=1, When 5yrs=0):", dt_accuracy_train)
+    print("--------------------------------------------------")
 
     # Train and evaluate Random Forest
+    print("Beginning Random Forest Model Training and Evaluation...")
     rf_model = model_instance.train_model(x_train, y_train, 'random_forest', param_grid=rf_params)
     rf_accuracy = model_instance.evaluate_model(rf_model, x_test, y_test)
-    print("Random Forest Model Accuracy (Overall, When 5yrs=1, When 5yrs=0):", rf_accuracy)
+    print("Random Forest Model Accuracy On Testing Split (Overall, When 5yrs=1, When 5yrs=0):", rf_accuracy)
+    rf_accuracy_train = model_instance.evaluate_model(rf_model, x_train, y_train)
+    print("Random Forest Model Accuracy On Training Split (Overall, When 5yrs=1, When 5yrs=0):", rf_accuracy_train)
+    print("--------------------------------------------------")
 
-    # Perform KMeans clustering on the entire dataset (example)
+    # Perform KMeans clustering on the entire dataset
+    print ("Performing KMeans Clustering...")
     kmeans_params = {'n_clusters': [2, 3, 4]}
     kmeans_model, cluster_labels = model_instance.perform_clustering(train_data, 'kmeans', param_grid=kmeans_params)
-    #print("KMeans Cluster Centers:", kmeans_model.cluster_centers_)
+    print("KMeans Cluster Labels:", cluster_labels)
+    print("KMeans Cluster Centers:", kmeans_model.cluster_centers_)
+    print("--------------------------------------------------")
     
     # Print chosen hyperparameters for each model
     print("Best Hyperparameters:")
     print("KNN:", model_instance.best_params['knn'])
     print("Decision Tree:", model_instance.best_params['decision_tree'])
     print("Random Forest:", model_instance.best_params['random_forest'])
+    print("K Means:", model_instance.best_params['kmeans'])
 
     print("Modelling Completed.")
     print("--------------------------------------------------")
