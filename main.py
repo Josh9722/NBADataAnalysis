@@ -3,11 +3,38 @@ import Modelling as modelling
 from ModelEvaluation import ModelEvaluation
 import numpy as np
 import pandas as pd
+import pickle 
+
 
 def main():
-    # Load the dataset
-    train_data = pd.read_csv('nba_train.csv')
+    analyse_train_data()
+    analyse_test_data() 
 
+def analyse_test_data():
+    # Take Test Data and Provide TARGET_5Yrs Predictions and Confidence Scores
+    test_data_original = pd.read_csv('nba_test.csv')
+    test_data_copy = test_data_original.copy()
+    
+    # Add the extra features to the test data
+    test_data_copy = preprocess.feature_engineering(test_data_copy)
+    
+    # Load the pre-trained Random Forest Model
+    rf_model = load_model('random_forest_model.pkl')
+    
+    # Make predictions
+    predictions = rf_model.predict(test_data_copy)
+    prediction_probabilities = rf_model.predict_proba(test_data_copy)[:, 1]  # Probability of class 1
+
+    # Add predictions to the test data
+    test_data_original['TARGET_5Yrs'] = predictions
+    test_data_original['Prediction_Probability'] = prediction_probabilities
+
+    # Save the result to a new CSV file
+    test_data_original.to_csv('nba_test_with_predictions.csv', index=False)
+
+
+def analyse_train_data():
+    train_data = pd.read_csv('nba_train.csv')
     # STEP 1: PRE PROCESSING
     # Training Data
     print("--------------------------------------------------")
@@ -91,7 +118,6 @@ def main():
     print("Modelling Completed.")
     print("--------------------------------------------------")
 
-
     # STEP 4: MODEL EVALUATION
     eval_instance = ModelEvaluation()
     
@@ -111,6 +137,25 @@ def main():
     eval_instance.plot_roc_curve()
 
 
+    # Saving the chosen model (Random Forest) to a file
+    save_model(rf_model, 'random_forest_model.pkl')
+
+
+def load_model(filename):
+    try:
+        with open(filename, 'rb') as file:
+            model = pickle.load(file)
+        print(f"Model loaded from {filename}")
+        return model
+    except FileNotFoundError:
+        print(f"File {filename} not found.")
+        return None
+def save_model(model, filename):
+    with open(filename, 'wb') as file:
+        pickle.dump(model, file)
+    print(f"Model saved to {filename}")
+    
+    
 
 if __name__ == "__main__":
     main()
